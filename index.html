@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stopwatch</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s ease;
+    }
+    #timeDisplay {
+      font-size: 6rem;
+      padding: 60px 90px;
+      border: 6px solid black;
+      border-radius: 30px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .buttons {
+      margin-top: 40px;
+      display: flex;
+      gap: 25px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="timeDisplay">00:00.0</div>
+  <div class="buttons">
+    <button id="resetButton">Reset</button>
+    <button id="fullscreenButton">Toggle Fullscreen</button>
+  </div>
+
+  <script>
+    let isRunning = false;
+    let startTime = 0;
+    let elapsed = 0;
+    let timerInterval;
+
+    const timeDisplay = document.getElementById('timeDisplay');
+    const resetButton = document.getElementById('resetButton');
+    const fullscreenButton = document.getElementById('fullscreenButton');
+
+    function updateTime() {
+      const now = Date.now();
+      const diff = now - startTime + elapsed;
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      const milliseconds = Math.floor((diff % 1000) / 100); // Only first digit
+
+      timeDisplay.textContent = 
+        `${String(minutes).padStart(2, '0')}:` +
+        `${String(seconds).padStart(2, '0')}.` +
+        `${milliseconds}`;
+    }
+
+    function startStopwatch() {
+      startTime = Date.now();
+      timerInterval = setInterval(updateTime, 50);
+      document.body.style.backgroundColor = 'white';
+    }
+
+    function stopStopwatch() {
+      clearInterval(timerInterval);
+      elapsed += Date.now() - startTime;
+      document.body.style.backgroundColor = 'red';
+    }
+
+    timeDisplay.addEventListener('click', () => {
+      isRunning = !isRunning;
+      if (isRunning) {
+        startStopwatch();
+      } else {
+        stopStopwatch();
+      }
+    });
+
+    resetButton.addEventListener('click', () => {
+      clearInterval(timerInterval);
+      elapsed = 0;
+      isRunning = false;
+      timeDisplay.textContent = '00:00.0';
+      document.body.style.backgroundColor = 'red';
+    });
+
+    fullscreenButton.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          alert(`Error attempting fullscreen: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    });
+
+    // Initial background color
+    document.body.style.backgroundColor = 'red';
+  </script>
+</body>
+</html>
+
