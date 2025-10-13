@@ -20,14 +20,25 @@
       margin-bottom: 10px;
     }
 
+    /* Container for all stopwatches */
+    #stopwatchContainer {
+      display: flex;
+      flex-wrap: wrap; /* Wrap on small screens */
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 1800px;
+    }
+
     .stopwatch {
       background-color: red;
       border: 4px solid black;
       border-radius: 20px;
-      padding: 30px 60px;
+      padding: 30px 40px;
       text-align: center;
-      width: 350px;
+      width: 320px;
       transition: background-color 0.3s ease;
+      flex-shrink: 0;
     }
 
     .time {
@@ -56,11 +67,26 @@
       border-radius: 8px;
       background: white;
     }
+
+    @media (max-width: 1600px) {
+      .stopwatch {
+        width: 280px;
+      }
+    }
+
+    @media (max-width: 1000px) {
+      .stopwatch {
+        width: 240px;
+        padding: 25px;
+      }
+      .time {
+        font-size: 4rem;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <h1>Multi Stopwatch (5 Slots)</h1>
   <div id="stopwatchContainer"></div>
 
   <script>
@@ -126,7 +152,8 @@
         const minutes = Math.floor(diff / 60000);
         const seconds = Math.floor((diff % 60000) / 1000);
         const milliseconds = Math.floor((diff % 1000) / 100); // tenths only
-        timeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${milliseconds}`;
+        timeDisplay.textContent =
+          `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${milliseconds}`;
       }
 
       function start() {
@@ -155,7 +182,7 @@
       });
     }
 
-    // --- Initialize 5 stopwatches always ---
+    // --- Initialize all 5 stopwatches ---
     function initialize() {
       for (let i = 0; i < MAX_STOPWATCHES; i++) {
         const title = titles[i] || '';
