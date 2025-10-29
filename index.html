@@ -140,11 +140,8 @@
 
 	
 	window.addEventListener('beforeunload', function (e) {
-		// Only warn if the stopwatch is running
-		if (isRunning) {
 		e.preventDefault(); // Some browsers require this
 		e.returnValue = ''; // Triggers the confirmation dialog
-		}
 	});
   </script>
 </body>
