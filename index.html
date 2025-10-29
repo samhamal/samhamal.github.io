@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Stopwatch</title>
+  <title>Timer</title>
   <style>
     body {
       margin: 0;
@@ -23,14 +23,17 @@
       user-select: none;
     }
     .buttons {
-      margin-top: 40px;
+      margin-top: 30px;
       display: flex;
-      gap: 25px;
+      gap: 20px;
     }
     button {
       padding: 12px 24px;
       font-size: 1.2rem;
       cursor: pointer;
+      border-radius: 10px;
+      border: 2px solid black;
+      background: white;
     }
   </style>
 </head>
@@ -47,39 +50,60 @@
     let startTime = 0;
     let elapsed = 0;
     let timerInterval;
+    let titleInterval;
+    let blink = false;
 
     const timeDisplay = document.getElementById('timeDisplay');
     const resetButton = document.getElementById('resetButton');
     const fullscreenButton = document.getElementById('fullscreenButton');
 
+    function getFormattedTime(diff) {
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      const tenths = Math.floor((diff % 1000) / 100);
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${tenths}`;
+    }
+
     function updateTime() {
       const now = Date.now();
       const diff = now - startTime + elapsed;
-      const minutes = Math.floor(diff / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-      const milliseconds = Math.floor((diff % 1000) / 100); // Only first digit
+      timeDisplay.textContent = getFormattedTime(diff);
+    }
 
-      timeDisplay.textContent = 
-        `${String(minutes).padStart(2, '0')}:` +
-        `${String(seconds).padStart(2, '0')}.` +
-        `${milliseconds}`;
+    function updateTitle() {
+      if (isRunning) {
+        const now = Date.now();
+        const diff = now - startTime + elapsed;
+        document.title = getFormattedTime(diff);
+      } else {
+        // Blink 🔴 when paused
+        blink = !blink;
+        document.title = blink ? 'Paused 🔴' : 'Paused';
+      }
     }
 
     function startStopwatch() {
       startTime = Date.now();
       timerInterval = setInterval(updateTime, 50);
+      titleInterval = setInterval(updateTitle, 100); // once per second
       document.body.style.backgroundColor = 'white';
+      document.title = getFormattedTime(0);
     }
 
     function stopStopwatch() {
       clearInterval(timerInterval);
+      clearInterval(titleInterval);
       elapsed += Date.now() - startTime;
+
+      // Start blinking red dot when paused
+      titleInterval = setInterval(updateTitle, 1000);
       document.body.style.backgroundColor = 'red';
     }
 
     timeDisplay.addEventListener('click', () => {
       isRunning = !isRunning;
       if (isRunning) {
+        clearInterval(titleInterval);
         startStopwatch();
       } else {
         stopStopwatch();
@@ -88,10 +112,15 @@
 
     resetButton.addEventListener('click', () => {
       clearInterval(timerInterval);
+      clearInterval(titleInterval);
       elapsed = 0;
       isRunning = false;
       timeDisplay.textContent = '00:00.0';
       document.body.style.backgroundColor = 'red';
+      blink = false;
+      document.title = 'Timer';
+      // Restart blinking paused indicator
+      titleInterval = setInterval(updateTitle, 1000);
     });
 
     fullscreenButton.addEventListener('click', () => {
@@ -104,9 +133,19 @@
       }
     });
 
-    // Initial background color
+    // Initial background & blinking paused indicator
     document.body.style.backgroundColor = 'red';
+    document.title = 'Timer';
+    titleInterval = setInterval(updateTitle, 1000);
+
+	
+	window.addEventListener('beforeunload', function (e) {
+		// Only warn if the stopwatch is running
+		if (isRunning) {
+		e.preventDefault(); // Some browsers require this
+		e.returnValue = ''; // Triggers the confirmation dialog
+		}
+	});
   </script>
 </body>
 </html>
-
